@@ -1,14 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+
+// const fetchTodos = async () => {
+//   const res = await fetch('http://localhost:3001/todos');
+
+//   if (!res.ok) {
+//     const json = await res.json();
+//     throw new Error(json.message);
+//   }
+
+//   return res.json();
+// };
 
 const fetchTodos = async () => {
-  const res = await fetch('http://localhost:3001/todos');
+  const res = await axios.get('http://localhost:3001/todos');
 
-  if (!res.ok) {
-    const json = await res.json();
-    throw new Error(json.message);
-  }
-
-  return res.json();
+  return res.data;
 };
 
 const Todo = () => {
@@ -27,7 +34,9 @@ const Todo = () => {
   }
 
   if (isError) {
-    return <span>Error: {error.message}</span>;
+    // return <span>Error: {error.message}</span>;
+
+    return <span>Error: {error.response.data.message}</span>;
   }
 
   return (
