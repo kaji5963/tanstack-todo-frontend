@@ -57,6 +57,20 @@ const Todo = () => {
     return res.json();
   };
 
+  const updateTodo = async (todo) => {
+    const res = await fetch(`http://localhost:3001/todos/${todo.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(todo),
+    });
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+    return res.json();
+  };
+
   const addMutation = useMutation({
     mutationFn: addTodo,
     onSuccess: () => {
@@ -87,6 +101,13 @@ const Todo = () => {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: updateTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+  });
+
   const handleChange = (e) => {
     setName(e.target.value);
   };
@@ -98,6 +119,10 @@ const Todo = () => {
 
   const handleRemoveTodo = (id) => {
     deleteMutation.mutate(id);
+  };
+
+  const handleCheckChange = (todo) => {
+    updateMutation.mutate(todo);
   };
 
   const {
@@ -136,7 +161,21 @@ const Todo = () => {
       </div>
       <ul>
         {todos?.map((todo) => (
-          <li key={todo.id}>
+          <li
+            key={todo.id}
+            style={
+              todo.isCompleted === true
+                ? { textDecorationLine: 'line-through' }
+                : {}
+            }
+          >
+            <input
+              type="checkbox"
+              checked={todo.isCompleted}
+              onChange={() =>
+                handleCheckChange({ ...todo, isCompleted: !todo.isCompleted })
+              }
+            />
             {todo.name}
             <button
               style={{ marginLeft: '0.2em', cursor: 'pointer' }}
