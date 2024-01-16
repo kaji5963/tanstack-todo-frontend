@@ -47,26 +47,43 @@ const Todo = () => {
     return res.json();
   };
 
+  const deleteTodo = async (id) => {
+    const res = await fetch(`http://localhost:3001/todos/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+    return res.json();
+  };
+
   const addMutation = useMutation({
     mutationFn: addTodo,
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries({ queryKey: ['todos'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+    // onMutate: (variables) => {
+    //   console.log('onMutate');
+    //   return variables;
     // },
-    onMutate: (variables) => {
-      console.log('onMutate');
-      return variables;
-    },
-    onSuccess: (data, variables, context) => {
-      console.log('data', data);
-      console.log('variables', variables);
-      console.log('context', context);
-      console.log('onSuccess');
-    },
-    onError: () => {
-      console.log('onError');
-    },
-    onSettled: () => {
-      console.log('onSettled');
+    // onSuccess: (data, variables, context) => {
+    //   console.log('data', data);
+    //   console.log('variables', variables);
+    //   console.log('context', context);
+    //   console.log('onSuccess');
+    // },
+    // onError: () => {
+    //   console.log('onError');
+    // },
+    // onSettled: () => {
+    //   console.log('onSettled');
+    // },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
     },
   });
 
@@ -77,6 +94,10 @@ const Todo = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     addMutation.mutate({ id: 1 });
+  };
+
+  const handleRemoveTodo = (id) => {
+    deleteMutation.mutate(id);
   };
 
   const {
@@ -115,7 +136,15 @@ const Todo = () => {
       </div>
       <ul>
         {todos?.map((todo) => (
-          <li key={todo.id}>{todo.name}</li>
+          <li key={todo.id}>
+            {todo.name}
+            <button
+              style={{ marginLeft: '0.2em', cursor: 'pointer' }}
+              onClick={() => handleRemoveTodo(todo.id)}
+            >
+              X
+            </button>
+          </li>
         ))}
       </ul>
     </>
